@@ -3,7 +3,7 @@
 import { StreamingTextResponse } from "ai"
 import { OpenAI } from "openai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import { Mistral } from "@mistralai/mistralai"
+import { createMistralClient } from "@/lib/mistral"
 import { createGroqClient } from "@/lib/groq"
 
 export async function streamOpenAI(question: string, apiKey: string) {
@@ -220,17 +220,27 @@ export async function streamDeepSeek(question: string, apiKey: string) {
 
 export async function streamMixtral(question: string, apiKey: string) {
   try {
-    const response = await fetch("https://api.together.xyz/v1/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        prompt: `<s>[INST] You are a chemistry expert. Provide a detailed, scientifically accurate response to this question: ${question} [/INST]`,
-        max_tokens: 1024,
+        model: "mistral-saba-24b",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+          },
+          {
+            role: "user",
+            content: question,
+          },
+        ],
         temperature: 0.7,
+        max_tokens: 1024,
         stream: true,
       }),
     })
@@ -240,30 +250,7 @@ export async function streamMixtral(question: string, apiKey: string) {
       throw new Error(errorText || `HTTP error ${response.status}`)
     }
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = response.body!.getReader()
-        const decoder = new TextDecoder()
-        try {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) {
-              break
-            }
-            // Process and enqueue the chunk
-            const chunk = decoder.decode(value)
-            controller.enqueue(new TextEncoder().encode(chunk))
-          }
-          controller.close()
-        } catch (e) {
-          controller.error(e)
-        } finally {
-          reader.releaseLock()
-        }
-      },
-    })
-
-    return new StreamingTextResponse(stream)
+    return new StreamingTextResponse(response.body!)
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message || "Failed to stream from Mixtral" }), {
       status: 500,

@@ -4,6 +4,7 @@ import { fetchApiKeys } from "@/lib/api-service"
 import { callGeminiAPI } from "@/lib/gemini-api"
 import { createServerOpenAIClient } from "@/lib/openai-client"
 import { createGroqClient } from "@/lib/groq"
+import { createMistralClient } from "@/lib/mistral"
 
 // Define the response type
 export type LlmResponse = {
@@ -240,18 +241,18 @@ export async function generateResponses(question: string): Promise<LlmResponses>
         }
       })(),
 
-      // Mixtral response (using Together API)
+      // Mixtral response (using Groq API)
       (async () => {
         try {
-          if (apiKeyStatus.validKeys.together && apiKeys["mixtral-key"]) {
-            const mixtralResponse = await fetch("https://api.together.xyz/v1/chat/completions", {
+          if (apiKeyStatus.validKeys.groq && apiKeys["groq-llama-key"]) {
+            const mixtralResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${apiKeys["mixtral-key"]}`,
+                Authorization: `Bearer ${apiKeys["groq-llama-key"]}`,
               },
               body: JSON.stringify({
-                model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                model: "mistral-saba-24b",
                 messages: [
                   {
                     role: "system",
@@ -279,7 +280,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
             return {
               modelId: "mixtral",
               response: {
-                text: mixtralData.choices[0].text,
+                text: mixtralData.choices[0].message.content,
                 timestamp,
               },
             }
@@ -289,7 +290,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
               response: {
                 text: "",
                 timestamp,
-                error: "Together API key for Mixtral is missing or invalid",
+                error: "Groq API key for Mixtral is missing or invalid",
               },
             }
           }
