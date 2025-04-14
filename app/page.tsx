@@ -3,7 +3,6 @@ import { UserHeader } from "@/components/user-header"
 import { ProgressSidebar } from "@/components/progress-sidebar"
 import { LlmComparison } from "@/components/llm-comparison"
 import { QuizCreation } from "@/components/quiz-creation"
-import { DocumentAnalyzer } from "@/components/document-analyzer"
 import { EvaluationQA } from "@/components/evaluation-qa"
 import { ProtectedRoute } from "@/components/protected-route"
 
@@ -31,12 +30,6 @@ export default function Home() {
                     LLM Comparison
                   </TabsTrigger>
                   <TabsTrigger
-                    value="document-analyzer"
-                    className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
-                    Document Analyzer
-                  </TabsTrigger>
-                  <TabsTrigger
                     value="take-test"
                     className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                   >
@@ -52,10 +45,6 @@ export default function Home() {
 
                 <TabsContent value="llm-comparison">
                   <LlmComparison />
-                </TabsContent>
-
-                <TabsContent value="document-analyzer">
-                  <DocumentAnalyzer />
                 </TabsContent>
 
                 <TabsContent value="take-test">
