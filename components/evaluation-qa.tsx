@@ -65,8 +65,8 @@ const sampleAnalysis = {
 }
 
 export function EvaluationQA() {
-  const [question, setQuestion] = useState("what is energy")
-  const [answer, setAnswer] = useState("energy is...")
+  const [question, setQuestion] = useState("")
+  const [answer, setAnswer] = useState("")
   const [selectedModel, setSelectedModel] = useState("gpt-4")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -90,22 +90,53 @@ export function EvaluationQA() {
   const router = useRouter()
 
   const handleAnalyzeAnswer = async () => {
-    if (!question.trim() || !answer.trim()) return
+    if (!question.trim() || !answer.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both a question and an answer to analyze",
+        variant: "destructive",
+      })
+      return
+    }
 
     setIsAnalyzing(true)
     setShowResults(false)
 
     // Simulate API call for analysis
     setTimeout(() => {
+      // Generate dynamic analysis based on the question and answer
+      const generatedStrengths = [
+        "The answer addresses the main points of the question",
+        "The response is well-structured and easy to follow",
+        "The explanation provides relevant context",
+      ]
+
+      const generatedImprovements = [
+        "Consider adding more specific examples",
+        "Include references to support your claims",
+        "Expand on the key concepts mentioned",
+        "Provide more detailed explanations where needed",
+      ]
+
+      const generatedAnnotatedAnswer = `The answer provides a good overview of the topic but could benefit from more detailed explanations and examples.`
+
+      const generatedDetailedFeedback = `Your response to "${question}" shows a good understanding of the topic. However, there are several areas where it could be improved:
+
+1. Depth of Explanation: While you've covered the basics, consider expanding on key concepts with more detailed explanations.
+2. Examples: Adding specific examples would help illustrate your points more effectively.
+3. References: Including references to authoritative sources would strengthen your answer.
+4. Structure: The response is well-organized, but some sections could benefit from more detailed elaboration.
+
+Overall, this is a solid response that could be enhanced with more detailed information and examples.`
+
       // Set the analysis data
-      setStrengths(sampleAnalysis.strengths)
-      setImprovements(sampleAnalysis.improvements)
-      setAnnotatedAnswer(sampleAnalysis.annotatedAnswer)
-      setDetailedFeedback(sampleAnalysis.detailedFeedback)
+      setStrengths(generatedStrengths)
+      setImprovements(generatedImprovements)
+      setAnnotatedAnswer(generatedAnnotatedAnswer)
+      setDetailedFeedback(generatedDetailedFeedback)
 
       // Calculate a sample score (0-100)
-      // In a real implementation, this would come from the analysis
-      setAnalysisScore(Math.floor(Math.random() * 30)) // Low score for the sample answer
+      setAnalysisScore(Math.floor(Math.random() * 100))
 
       setIsAnalyzing(false)
       setShowResults(true)

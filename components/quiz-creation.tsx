@@ -127,7 +127,14 @@ export function QuizCreation() {
   const router = useRouter()
 
   const handleGenerateQuestion = async () => {
-    if (!topic.trim()) return
+    if (!topic.trim()) {
+      toast({
+        title: "Missing topic",
+        description: "Please enter a topic to generate questions",
+        variant: "destructive",
+      })
+      return
+    }
 
     setIsGenerating(true)
 
@@ -140,43 +147,43 @@ export function QuizCreation() {
 
       switch (selectedType) {
         case "Multiple Choice":
-          questionText = `What is the primary characteristic of ${topic} in chemistry?`
-          correctAnswer = `The ability to form covalent bonds with other elements`
+          questionText = `What is the primary characteristic of ${topic}?`
+          correctAnswer = `The main defining feature of ${topic}`
           incorrectOptions = [
-            `The inability to react with any other elements`,
-            `The tendency to only exist in gaseous form`,
-            `The property of being radioactive`,
+            `An unrelated characteristic`,
+            `A secondary feature`,
+            `A common misconception`,
           ]
           break
         case "True/False":
-          questionText = `True or False: ${topic.charAt(0).toUpperCase() + topic.slice(1)} can be melted and reformed multiple times without undergoing any significant chemical change.`
+          questionText = `True or False: ${topic.charAt(0).toUpperCase() + topic.slice(1)} can be described as...`
           correctAnswer = "True"
           incorrectOptions = ["False"]
           break
         case "Open Ended":
-          questionText = `Explain the importance of ${topic} in modern chemistry and its applications.`
-          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} plays a crucial role in modern chemistry due to its unique properties...`
+          questionText = `Explain the importance of ${topic} and its applications.`
+          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} is important because...`
           incorrectOptions = [] // No incorrect options for open-ended questions
           break
         case "Short Answer":
-          questionText = `Define ${topic} and provide one example of its use in chemistry.`
-          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a type of chemical compound that...`
+          questionText = `Define ${topic} and provide one example of its use.`
+          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} is defined as...`
           incorrectOptions = [
-            `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a laboratory technique used for...`,
-            `${topic.charAt(0).toUpperCase() + topic.slice(1)} refers to a chemical reaction that...`,
-          ] // Some possible incorrect answers
+            `An incorrect definition`,
+            `A misleading example`,
+          ]
           break
         case "Numerical":
-          questionText = `Calculate the molecular weight of ${topic} if it contains 6 carbon atoms, 12 hydrogen atoms, and 1 oxygen atom.`
-          correctAnswer = "100.16 g/mol"
-          incorrectOptions = ["98.14 g/mol", "102.18 g/mol", "104.20 g/mol"]
+          questionText = `Calculate the value related to ${topic} given the following parameters...`
+          correctAnswer = "The calculated value"
+          incorrectOptions = ["An incorrect calculation", "A different value"]
           break
         default:
           questionText = `What is ${topic}?`
-          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a fundamental concept in chemistry...`
+          correctAnswer = `${topic.charAt(0).toUpperCase() + topic.slice(1)} is...`
           incorrectOptions = [
-            `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a type of laboratory equipment...`,
-            `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a chemical reaction that...`,
+            `An incorrect definition`,
+            `A misleading description`,
           ]
       }
 
@@ -185,7 +192,7 @@ export function QuizCreation() {
         question: questionText,
         correctAnswer: correctAnswer,
         incorrectOptions: incorrectOptions,
-        explanation: `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a type of chemical compound that has specific properties and behaviors. It is characterized by its molecular structure and reactivity patterns. Understanding ${topic} is essential for comprehending various chemical processes and reactions. The field encompasses both theoretical and practical aspects, including laboratory techniques and computational methods.`,
+        explanation: `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a topic that can be explored from various perspectives. Understanding ${topic} is essential for gaining a comprehensive knowledge of the subject matter. The field encompasses both theoretical and practical aspects, including key concepts and real-world applications.`,
         type: selectedType,
         difficulty: selectedDifficulty,
         category: selectedCategory,
@@ -296,8 +303,6 @@ export function QuizCreation() {
             ...prev,
             [id]: false,
           }))
-
-          // No need to refresh the page since we're using real-time updates now
         }, 3000)
 
         toast({
@@ -305,8 +310,6 @@ export function QuizCreation() {
           description: "Your quiz question has been saved successfully",
           variant: "default",
         })
-
-        console.log("Submitted rating for question:", id, question.ratings)
       }
     } catch (error) {
       console.error("Error saving quiz:", error)
@@ -728,7 +731,7 @@ export function QuizCreation() {
                                 </div>
 
                                 <Button
-                                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-4"
+                                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-4 relative overflow-hidden"
                                   onClick={() => handleSubmitRating(question.id)}
                                   disabled={
                                     !question.ratings?.scientific ||
@@ -738,14 +741,59 @@ export function QuizCreation() {
                                     submissionSuccess[question.id]
                                   }
                                 >
-                                  {submissionSuccess[question.id] ? (
-                                    <>
-                                      <CheckCircle className="mr-2 h-4 w-4" />
-                                      Saved Successfully
-                                    </>
-                                  ) : (
-                                    "Submit Rating"
-                                  )}
+                                  <motion.div
+                                    className="absolute inset-0 bg-primary/20"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: submissionSuccess[question.id] ? 1 : 0 }}
+                                    transition={{ duration: 0.3 }}
+                                  />
+                                  <motion.div
+                                    className="flex items-center justify-center gap-2"
+                                    initial={{ opacity: 1 }}
+                                    animate={{ opacity: submissionSuccess[question.id] ? 0 : 1 }}
+                                  >
+                                    <motion.span
+                                      initial={{ scale: 1 }}
+                                      animate={{ scale: submissionSuccess[question.id] ? 0 : 1 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                    >
+                                      Submit Rating
+                                    </motion.span>
+                                  </motion.div>
+                                  <AnimatePresence>
+                                    {submissionSuccess[question.id] && (
+                                      <motion.div
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        initial={{ opacity: 0, scale: 0.5 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.5 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                      >
+                                        <motion.div
+                                          className="flex items-center gap-2"
+                                          initial={{ opacity: 0, y: 20 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          transition={{ delay: 0.1 }}
+                                        >
+                                          <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                          >
+                                            <CheckCircle className="h-5 w-5" />
+                                          </motion.div>
+                                          <motion.span
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.2 }}
+                                          >
+                                            Saved Successfully
+                                          </motion.span>
+                                        </motion.div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
                                 </Button>
                               </div>
                             </div>
