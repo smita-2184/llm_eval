@@ -67,7 +67,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
             }
 
             const openaiResponse = await openai.chat.completions.create({
-              model: "gpt-4o", // Using gpt-4o as it's widely available
+              model: "gpt-4",
               messages: [
                 {
                   role: "system",
@@ -79,10 +79,9 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   content: question,
                 },
               ],
-              temperature: 1,
+              temperature: 0.7,
               max_tokens: 1024,
-              top_p: 1,
-              store: true,
+              top_p: 0.95,
             })
 
             // Extract text from the updated response format
@@ -199,6 +198,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                 ],
                 temperature: 0.7,
                 max_tokens: 1024,
+                top_p: 0.95,
               }),
             })
 
@@ -243,7 +243,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
       (async () => {
         try {
           if (apiKeyStatus.validKeys.together && apiKeys["mixtral-key"]) {
-            const mixtralResponse = await fetch("https://api.together.xyz/v1/completions", {
+            const mixtralResponse = await fetch("https://api.together.xyz/v1/chat/completions", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -251,9 +251,20 @@ export async function generateResponses(question: string): Promise<LlmResponses>
               },
               body: JSON.stringify({
                 model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-                prompt: `<s>[INST] You are a chemistry expert. Provide a detailed, scientifically accurate response to this question: ${question} [/INST]`,
-                max_tokens: 1024,
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                  },
+                  {
+                    role: "user",
+                    content: question,
+                  },
+                ],
                 temperature: 0.7,
+                max_tokens: 1024,
+                top_p: 0.95,
               }),
             })
 

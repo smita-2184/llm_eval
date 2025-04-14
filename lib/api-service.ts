@@ -46,22 +46,27 @@ export async function fetchApiKeys(): Promise<ApiKeyStatus> {
         ...fetchedData,
       }
 
-      // Ensure all keys are strings
+      // Ensure all keys are strings and trim whitespace
       Object.keys(data).forEach((key) => {
-        if (typeof data[key as keyof ApiKeys] !== "string" && key !== "updatedAt") {
-          data[key as keyof ApiKeys] = ""
+        if (key !== "updatedAt") {
+          const value = data[key as keyof ApiKeys]
+          if (typeof value === "string") {
+            data[key as keyof ApiKeys] = value.trim()
+          } else {
+            data[key as keyof ApiKeys] = ""
+          }
         }
       })
     } else {
       console.warn("API keys document not found in Firestore")
     }
 
-    // Check which keys are valid
+    // Check which keys are valid with improved error handling
     const validKeys = {
-      openai: isValidOpenAIKey(data["openai-key"]),
-      gemini: isValidGeminiKey(data["google-key"]),
-      groq: isValidGroqKey(data["groq-llama-key"]),
-      together: isValidTogetherKey(data["mixtral-key"]),
+      openai: await isValidOpenAIKey(data["openai-key"] || ""),
+      gemini: await isValidGeminiKey(data["google-key"] || ""),
+      groq: await isValidGroqKey(data["groq-llama-key"] || ""),
+      together: await isValidTogetherKey(data["mixtral-key"] || ""),
     }
 
     const hasAnyValidKey = Object.values(validKeys).some((valid) => valid)
@@ -77,7 +82,23 @@ export async function fetchApiKeys(): Promise<ApiKeyStatus> {
     }
   } catch (error) {
     console.error("Error fetching API keys:", error)
-    throw error
+    // Return default values with all keys invalid
+    return {
+      keys: {
+        "google-key": "",
+        "groq-llama-key": "",
+        "mixtral-key": "",
+        "openai-key": "",
+        updatedAt: new Date().toISOString(),
+      },
+      validKeys: {
+        openai: false,
+        gemini: false,
+        groq: false,
+        together: false,
+      },
+      hasAnyValidKey: false,
+    }
   }
 }
 

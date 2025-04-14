@@ -112,7 +112,8 @@ export function LlmComparison() {
         generatedResponses = await generateResponses(question)
       } catch (err: any) {
         console.error("Error in generateResponses:", err)
-        // Don't rethrow - we'll handle partial failures
+        setError(err.message || "Failed to generate responses")
+        return
       }
 
       // Merge with initial responses to ensure we have entries for all models
@@ -120,16 +121,22 @@ export function LlmComparison() {
 
       // Update with any successful responses
       Object.entries(generatedResponses).forEach(([modelId, response]) => {
-        mergedResponses[modelId] = response
-      })
-
-      // Clear loading state for any models that didn't get a response
-      Object.keys(mergedResponses).forEach((modelId) => {
-        if (mergedResponses[modelId].loading) {
+        if (response && response.text) {
+          mergedResponses[modelId] = {
+            ...response,
+            loading: false,
+          }
+        } else if (response && response.error) {
+          mergedResponses[modelId] = {
+            ...response,
+            loading: false,
+          }
+        } else {
           mergedResponses[modelId] = {
             text: "",
             timestamp: new Date().toISOString(),
             error: "Failed to get response from this model",
+            loading: false,
           }
         }
       })
@@ -146,12 +153,7 @@ export function LlmComparison() {
       }
     } catch (err: any) {
       console.error("Unexpected error in handleGenerateResponses:", err)
-
-      // Don't clear responses - keep any that might have succeeded
-      if (Object.keys(responses).length === 0) {
-        // Only set error if we have no responses at all
-        setError("Failed to generate responses. Please try again.")
-      }
+      setError(err.message || "An unexpected error occurred")
     } finally {
       setIsGenerating(false)
     }
