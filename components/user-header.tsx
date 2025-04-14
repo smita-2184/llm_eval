@@ -16,12 +16,21 @@ import { RatingGuideModal } from "@/components/rating-guide-modal"
 import { ScaleValidation } from "@/components/scale-validation"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
+import { Profile } from "@/components/profile"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export function UserHeader() {
   // Add state for the Rating Guide modal
   const [ratingGuideOpen, setRatingGuideOpen] = useState(false)
   // Add state for the Scale Validation modal
   const [scaleValidationOpen, setScaleValidationOpen] = useState(false)
+  // Add state for the Profile modal
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const { userData, signOut } = useAuth()
   const router = useRouter()
@@ -98,7 +107,7 @@ export function UserHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-popover border-border/50 w-48">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setProfileOpen(true)}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
@@ -124,6 +133,16 @@ export function UserHeader() {
 
       {/* Add the Scale Validation Modal */}
       <ScaleValidation open={scaleValidationOpen} onOpenChange={setScaleValidationOpen} />
+
+      {/* Add the Profile Modal */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Profile Information</DialogTitle>
+          </DialogHeader>
+          <Profile />
+        </DialogContent>
+      </Dialog>
     </header>
   )
 }
