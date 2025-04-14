@@ -14,7 +14,6 @@ export interface UserActivity {
 // Define the LLM models we want to track
 export const llmModels = [
   { id: "gpt-4", name: "GPT-4" },
-  { id: "gpt-3.5", name: "GPT-3.5" },
   { id: "gemini-pro", name: "Gemini Pro" },
   { id: "llama", name: "LLaMA" },
   { id: "mixtral", name: "Mixtral" },
