@@ -48,6 +48,13 @@ const models = [
     color: "border-pink-500 bg-pink-50/10 hover:bg-pink-100/20",
     activeColor: "border-pink-500 bg-pink-100/30 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
   },
+  {
+    id: "deepseek",
+    name: "DeepSeek",
+    icon: "🔍",
+    color: "border-indigo-500 bg-indigo-50/10 hover:bg-indigo-100/20",
+    activeColor: "border-indigo-500 bg-indigo-100/30 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  },
 ]
 
 // Sample data for the analysis
