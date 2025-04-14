@@ -1,9 +1,10 @@
 "use server"
 
 import { StreamingTextResponse } from "ai"
-import OpenAI from "openai"
+import { OpenAI } from "openai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { Mistral } from "@mistralai/mistralai"
+import { createGroqClient } from "@/lib/groq"
 
 export async function streamOpenAI(question: string, apiKey: string) {
   try {
@@ -178,31 +179,37 @@ export async function streamGroq(question: string, apiKey: string) {
 
 export async function streamDeepSeek(question: string, apiKey: string) {
   try {
-    const openai = new OpenAI({
-      apiKey: apiKey,
-      baseURL: "https://api.deepseek.com/v1",
-      dangerouslyAllowBrowser: true,
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek-r1-distill-llama-70b",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+          },
+          {
+            role: "user",
+            content: question,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        stream: true,
+      }),
     })
 
-    const response = await openai.chat.completions.create({
-      model: "deepseek-chat",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
-        },
-        {
-          role: "user",
-          content: question,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 1024,
-      stream: true,
-    })
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error ${response.status}`)
+    }
 
-    return new StreamingTextResponse(response)
+    return new StreamingTextResponse(response.body!)
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message || "Failed to stream from DeepSeek" }), {
       status: 500,

@@ -3,6 +3,7 @@
 import { fetchApiKeys } from "@/lib/api-service"
 import { callGeminiAPI } from "@/lib/gemini-api"
 import { createServerOpenAIClient } from "@/lib/openai-client"
+import { createGroqClient } from "@/lib/groq"
 
 // Define the response type
 export type LlmResponse = {
@@ -305,60 +306,46 @@ export async function generateResponses(question: string): Promise<LlmResponses>
         }
       })(),
 
-      // DeepSeek response (using DeepSeek API)
+      // DeepSeek response (using Groq API)
       (async () => {
         try {
-          if (apiKeyStatus.validKeys.openai && apiKeys["openai-key"]) {
-            const openaiKey = apiKeys["openai-key"]
-
-            // Safely create DeepSeek client
-            let deepseekClient
-            try {
-              // Ensure openaiKey is a valid string
-              if (!openaiKey || typeof openaiKey !== "string") {
-                throw new Error("Invalid OpenAI API key format for DeepSeek")
-              }
-              deepseekClient = await safeCreateOpenAIClient(openaiKey, "https://api.deepseek.com/v1")
-            } catch (clientError) {
-              throw new Error(`Failed to initialize DeepSeek client: ${clientError.message}`)
-            }
-
-            const deepseekResponse = await deepseekClient.chat.completions.create({
-              model: "deepseek-chat",
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
-                },
-                {
-                  role: "user",
-                  content: question,
-                },
-              ],
-              temperature: 0.7,
-              max_tokens: 1024,
-              store: true,
+          if (apiKeyStatus.validKeys.groq && apiKeys["groq-llama-key"]) {
+            const deepseekResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${apiKeys["groq-llama-key"]}`,
+              },
+              body: JSON.stringify({
+                model: "deepseek-r1-distill-llama-70b",
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                  },
+                  {
+                    role: "user",
+                    content: question,
+                  },
+                ],
+                temperature: 0.7,
+                max_tokens: 1024,
+                top_p: 0.95,
+              }),
             })
 
-            // Extract text from response with updated format awareness
-            let deepseekText = ""
-            if (
-              deepseekResponse &&
-              deepseekResponse.choices &&
-              deepseekResponse.choices[0] &&
-              deepseekResponse.choices[0].message &&
-              typeof deepseekResponse.choices[0].message.content === "string"
-            ) {
-              deepseekText = deepseekResponse.choices[0].message.content
-            } else {
-              throw new Error("Unexpected response format from DeepSeek")
+            if (!deepseekResponse.ok) {
+              const errorData = await deepseekResponse.json()
+              throw new Error(errorData.error?.message || "API request failed")
             }
+
+            const deepseekData = await deepseekResponse.json()
 
             return {
               modelId: "deepseek",
               response: {
-                text: deepseekText,
+                text: deepseekData.choices[0].message.content,
                 timestamp,
               },
             }
@@ -368,7 +355,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
               response: {
                 text: "",
                 timestamp,
-                error: "OpenAI API key for DeepSeek is missing or invalid",
+                error: "Groq API key for DeepSeek is missing or invalid",
               },
             }
           }

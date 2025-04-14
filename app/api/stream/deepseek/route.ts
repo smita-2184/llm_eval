@@ -7,14 +7,14 @@ export async function POST(req: Request) {
 
     const apiKeyStatus = await fetchApiKeys()
 
-    if (!apiKeyStatus.validKeys.openai) {
-      return new Response(JSON.stringify({ error: "OpenAI API key is missing or invalid" }), {
+    if (!apiKeyStatus.validKeys.groq) {
+      return new Response(JSON.stringify({ error: "Groq API key is missing or invalid" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       })
     }
 
-    return streamDeepSeek(question, apiKeyStatus.keys["openai-key"] || "")
+    return streamDeepSeek(question, apiKeyStatus.keys["groq-llama-key"] || "")
   } catch (error: any) {
     console.error("DeepSeek streaming error:", error)
     return new Response(JSON.stringify({ error: error.message || "Failed to process request" }), {
