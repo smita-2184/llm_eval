@@ -398,7 +398,7 @@ export default function RegisterPage() {
                   />
                   <Label htmlFor="terms" className="text-sm text-gray-600 dark:text-gray-400 font-normal">
                     I agree to the processing of my personal data for research purposes and accept the{" "}
-                    <Link href="#" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                       terms and conditions
                     </Link>
                   </Label>
