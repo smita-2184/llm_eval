@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
+import { ReactElement } from "react"
 
 const llmModels = [
   {
@@ -505,8 +506,75 @@ export function LlmComparison() {
                     </CardHeader>
 
                     <CardContent>
-                      <div className="bg-secondary/30 p-4 rounded-lg mb-4 whitespace-pre-line border border-border/40">
-                        {response.text}
+                      <div className="bg-secondary/30 p-4 rounded-lg mb-4 border border-border/40 markdown-content">
+                        {modelId === "deepseek" ? (
+                          <div className="space-y-4">
+                            <div>
+                              <h2 className="text-xl font-semibold mb-2 text-primary/90">Thinking Process</h2>
+                              <div className="bg-secondary/50 p-3 rounded-lg">
+                                {response.text.split("<think>")[1]?.split("</think>")[0]?.split('\n').map((line, index) => (
+                                  <p key={index} className="text-muted-foreground mb-2">{line.trim()}</p>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-semibold mb-2 text-primary/90">Final Answer</h2>
+                              <div className="prose prose-sm max-w-none dark:prose-invert">
+                                {(() => {
+                                  // Get the content after "Final Answer"
+                                  const finalAnswerContent = response.text.split("Final Answer")[1] || "";
+                                  // Remove any content within think tags
+                                  const cleanContent = finalAnswerContent.replace(/<think>[\s\S]*?<\/think>/g, '');
+                                  // Split into lines and process
+                                  const elements: (ReactElement | null)[] = cleanContent.split('\n').map((line, index) => {
+                                    if (!line.trim()) return null;
+                                    
+                                    if (line.startsWith('# ')) {
+                                      return <h1 key={index} className="text-2xl font-bold mb-4">{line.substring(2)}</h1>
+                                    } else if (line.startsWith('## ')) {
+                                      return <h2 key={index} className="text-xl font-semibold mb-3">{line.substring(3)}</h2>
+                                    } else if (line.startsWith('### ')) {
+                                      return <h3 key={index} className="text-lg font-medium mb-2">{line.substring(4)}</h3>
+                                    } else if (line.startsWith('* ')) {
+                                      return <li key={index} className="ml-4 list-disc">{line.substring(2)}</li>
+                                    } else if (line.startsWith('**') && line.endsWith('**')) {
+                                      return <strong key={index} className="font-bold">{line.substring(2, line.length - 2)}</strong>
+                                    } else if (line.startsWith('*') && line.endsWith('*')) {
+                                      return <em key={index} className="italic">{line.substring(1, line.length - 1)}</em>
+                                    } else if (line.startsWith('```')) {
+                                      return <pre key={index} className="bg-secondary/50 p-2 rounded my-2 overflow-x-auto"><code>{line.substring(3)}</code></pre>
+                                    } else {
+                                      return <p key={index} className="mb-2">{line}</p>
+                                    }
+                                  });
+                                  return elements;
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="prose prose-sm max-w-none dark:prose-invert">
+                            {response.text.split('\n').map((line, index) => {
+                              if (line.startsWith('# ')) {
+                                return <h1 key={index} className="text-2xl font-bold mb-4">{line.substring(2)}</h1>
+                              } else if (line.startsWith('## ')) {
+                                return <h2 key={index} className="text-xl font-semibold mb-3">{line.substring(3)}</h2>
+                              } else if (line.startsWith('### ')) {
+                                return <h3 key={index} className="text-lg font-medium mb-2">{line.substring(4)}</h3>
+                              } else if (line.startsWith('* ')) {
+                                return <li key={index} className="ml-4 list-disc">{line.substring(2)}</li>
+                              } else if (line.startsWith('**') && line.endsWith('**')) {
+                                return <strong key={index} className="font-bold">{line.substring(2, line.length - 2)}</strong>
+                              } else if (line.startsWith('*') && line.endsWith('*')) {
+                                return <em key={index} className="italic">{line.substring(1, line.length - 1)}</em>
+                              } else if (line.startsWith('```')) {
+                                return <pre key={index} className="bg-secondary/50 p-2 rounded my-2 overflow-x-auto"><code>{line.substring(3)}</code></pre>
+                              } else {
+                                return <p key={index} className="mb-2">{line}</p>
+                              }
+                            })}
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-4">
