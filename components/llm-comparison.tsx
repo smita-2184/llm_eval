@@ -82,6 +82,9 @@ export function LlmComparison() {
   const [submissionSuccess, setSubmissionSuccess] = useState(false)
   const [apiKeyWarning, setApiKeyWarning] = useState<boolean>(false)
   const [wouldUseAgain, setWouldUseAgain] = useState<Record<string, boolean>>({})
+  const [helpfulRatings, setHelpfulRatings] = useState<Record<string, boolean>>({})
+  const [comments, setComments] = useState<Record<string, string>>({})
+  const [showCommentInput, setShowCommentInput] = useState<Record<string, boolean>>({})
 
   const { userData } = useAuth()
   const router = useRouter()
@@ -185,6 +188,24 @@ export function LlmComparison() {
     return sum / Object.values(modelRatings).length
   }
 
+  const handleHelpfulRating = (modelId: string, isHelpful: boolean) => {
+    setHelpfulRatings({
+      ...helpfulRatings,
+      [modelId]: isHelpful,
+    })
+    setShowCommentInput({
+      ...showCommentInput,
+      [modelId]: true,
+    })
+  }
+
+  const handleCommentChange = (modelId: string, comment: string) => {
+    setComments({
+      ...comments,
+      [modelId]: comment,
+    })
+  }
+
   const handleSubmitEvaluations = async () => {
     if (!userData) {
       setError("You must be logged in to submit evaluations")
@@ -226,6 +247,10 @@ export function LlmComparison() {
           userId: userData.id,
           username: userData.username,
           willingness: willingness,
+          feedback: helpfulRatings[modelId] !== undefined ? {
+            isHelpful: helpfulRatings[modelId],
+            comment: comments[modelId] || undefined,
+          } : undefined,
         }
 
         // Save the evaluation to Firebase
@@ -243,13 +268,16 @@ export function LlmComparison() {
         // Reset ratings after successful submission
         setRatings({})
         setWouldUseAgain({})
+        setHelpfulRatings({})
+        setComments({})
+        setShowCommentInput({})
 
         // No need to refresh the page since we're using real-time updates now
       } else {
         setError("No evaluations were submitted. Please rate at least one model.")
       }
-    } catch (err) {
-      console.error("Error submitting evaluations:", err)
+    } catch (error) {
+      console.error("Error submitting evaluations:", error)
       setError("Failed to submit evaluations. Please try again.")
     } finally {
       setIsSubmitting(false)
@@ -731,33 +759,38 @@ export function LlmComparison() {
                       </div>
                     </CardContent>
 
-                    <CardFooter className="border-t border-border/40 pt-4 flex justify-between">
+                    <CardFooter className="border-t border-border/40 pt-4 flex flex-col gap-4">
                       <div className="flex space-x-2">
                         <Button
-                          variant="outline"
+                          variant={helpfulRatings[modelId] === true ? "default" : "outline"}
                           size="sm"
-                          className="flex items-center bg-secondary/50 border-border/40 hover:bg-secondary"
+                          className="flex items-center"
+                          onClick={() => handleHelpfulRating(modelId, true)}
                         >
                           <ThumbsUp className="h-4 w-4 mr-1" />
                           Helpful
                         </Button>
                         <Button
-                          variant="outline"
+                          variant={helpfulRatings[modelId] === false ? "default" : "outline"}
                           size="sm"
-                          className="flex items-center bg-secondary/50 border-border/40 hover:bg-secondary"
+                          className="flex items-center"
+                          onClick={() => handleHelpfulRating(modelId, false)}
                         >
                           <ThumbsDown className="h-4 w-4 mr-1" />
                           Not Helpful
                         </Button>
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-secondary/50 border-border/40 hover:bg-secondary"
-                      >
-                        Add Comment
-                      </Button>
+                      {showCommentInput[modelId] && (
+                        <div className="w-full">
+                          <Textarea
+                            placeholder="Add a comment (optional)"
+                            value={comments[modelId] || ""}
+                            onChange={(e) => handleCommentChange(modelId, e.target.value)}
+                            className="min-h-[100px]"
+                          />
+                        </div>
+                      )}
                     </CardFooter>
                   </Card>
                 </motion.div>

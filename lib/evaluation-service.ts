@@ -15,6 +15,10 @@ export interface EvaluationData {
   username: string
   willingness: string
   timestamp?: any
+  feedback?: {
+    isHelpful: boolean
+    comment?: string
+  }
 }
 
 export async function saveEvaluation(data: EvaluationData) {
