@@ -41,6 +41,7 @@ export default function RegisterPage() {
   const [semester, setSemester] = useState("Semester 1")
   const [major, setMajor] = useState("")
   const [university, setUniversity] = useState("")
+  const [showUniversitySuggestions, setShowUniversitySuggestions] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -117,6 +118,20 @@ export default function RegisterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleUniversityChange = (value: string) => {
+    setUniversity(value)
+    // Show suggestions if the input contains "illinois" or "chicago"
+    setShowUniversitySuggestions(
+      value.toLowerCase().includes("illinois") || 
+      value.toLowerCase().includes("chicago")
+    )
+  }
+
+  const handleUniversitySuggestionClick = (suggestion: string) => {
+    setUniversity(suggestion)
+    setShowUniversitySuggestions(false)
   }
 
   return (
@@ -321,7 +336,7 @@ export default function RegisterPage() {
                   />
                 </div>
 
-                <div>
+                <div className="relative">
                   <Label className="text-sm text-gray-600 dark:text-gray-400 mb-1.5 block font-medium">
                     <div className="flex items-center">
                       <GraduationCap className="h-4 w-4 mr-1.5 text-gray-500" />
@@ -331,10 +346,24 @@ export default function RegisterPage() {
                   <Input
                     placeholder="Enter your university name"
                     value={university}
-                    onChange={(e) => setUniversity(e.target.value)}
+                    onChange={(e) => handleUniversityChange(e.target.value)}
                     className="h-12 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     required
                   />
+                  {showUniversitySuggestions && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden"
+                    >
+                      <div
+                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        onClick={() => handleUniversitySuggestionClick("University of Illinois Chicago")}
+                      >
+                        University of Illinois Chicago
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="flex items-start space-x-3 pt-2">
