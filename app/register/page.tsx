@@ -21,6 +21,8 @@ import {
   Calendar,
   XCircle,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -35,6 +37,7 @@ export default function RegisterPage() {
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [isUsernameTaken, setIsUsernameTaken] = useState(false)
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [gender, setGender] = useState("Prefer not to say")
   const [course, setCourse] = useState("B.Sc")
   const [customCourse, setCustomCourse] = useState("")
@@ -239,13 +242,26 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 h-12 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     required
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-3 top-3 h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
 
                 <div>
