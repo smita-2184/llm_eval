@@ -358,7 +358,7 @@ export function LlmComparison() {
             <CardHeader className="pb-2">
               <CardTitle className="text-xl font-semibold flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-primary" />
-                Enter Your Research Question
+                Enter Your Question
               </CardTitle>
               <CardDescription>Ask a question to compare responses from different LLMs</CardDescription>
             </CardHeader>
@@ -616,10 +616,10 @@ export function LlmComparison() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className={`h-9 w-9 ${
+                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
                                         ratings[modelId]?.scientific === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary"
-                                          : "bg-secondary/50 border-border/40"
+                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
+                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "scientific", rating)}
                                     >
@@ -655,10 +655,10 @@ export function LlmComparison() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className={`h-9 w-9 ${
+                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
                                         ratings[modelId]?.clarity === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary"
-                                          : "bg-secondary/50 border-border/40"
+                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
+                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "clarity", rating)}
                                     >
@@ -694,10 +694,10 @@ export function LlmComparison() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className={`h-9 w-9 ${
+                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
                                         ratings[modelId]?.helpfulness === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary"
-                                          : "bg-secondary/50 border-border/40"
+                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
+                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "helpfulness", rating)}
                                     >

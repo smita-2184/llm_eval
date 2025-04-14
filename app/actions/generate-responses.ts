@@ -74,7 +74,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                 {
                   role: "system",
                   content:
-                    "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                    "You are an expert assistant. Provide a detailed and accurate response to the question.",
                 },
                 {
                   role: "user",
@@ -185,7 +185,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                      "You are an expert assistant. Provide a detailed and accurate response to the question.",
                   },
                   {
                     role: "user",
@@ -251,7 +251,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations. Format your response in markdown with proper headings, bullet points, and code blocks where appropriate.",
+                      "You are an expert assistant. Provide a detailed and accurate response to the question. Format your response in markdown with proper headings, bullet points, and code blocks where appropriate.",
                   },
                   {
                     role: "user",
@@ -320,7 +320,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations. Format your response with a 'Thinking Process' section followed by a 'Final Answer' section.",
+                      "You are an expert assistant. Provide a detailed and accurate response to the question. Format your response with a 'Thinking Process' section followed by a 'Final Answer' section.",
                   },
                   {
                     role: "user",
