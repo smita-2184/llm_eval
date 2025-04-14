@@ -29,7 +29,7 @@ export async function fetchUserActivities(userId: string): Promise<UserActivity>
       completedScaleValidation: false,
       completedTestModels: [],
       completedQuizModels: [],
-      totalActivities: llmModels.length * 3 + 1, // LLMs * 3 categories + scale validation
+      totalActivities: llmModels.length * 3 + 1, // 5 LLMs * 3 categories + 1 scale validation = 16 tasks
       completedActivities: 0,
       completionPercentage: 0,
     }
@@ -110,7 +110,7 @@ export async function fetchUserActivities(userId: string): Promise<UserActivity>
       completedScaleValidation: false,
       completedTestModels: [],
       completedQuizModels: [],
-      totalActivities: llmModels.length * 3 + 1,
+      totalActivities: llmModels.length * 3 + 1, // 5 LLMs * 3 categories + 1 scale validation = 16 tasks
       completedActivities: 0,
       completionPercentage: 0,
     }
@@ -133,7 +133,7 @@ export function subscribeToUserActivities(
       completedScaleValidation: false,
       completedTestModels: [],
       completedQuizModels: [],
-      totalActivities: llmModels.length * 3 + 1, // LLMs * 3 categories + scale validation
+      totalActivities: llmModels.length * 3 + 1, // 5 LLMs * 3 categories + 1 scale validation = 16 tasks
       completedActivities: 0,
       completionPercentage: 0,
     }
