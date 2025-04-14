@@ -40,6 +40,7 @@ export default function RegisterPage() {
   const [customCourse, setCustomCourse] = useState("")
   const [semester, setSemester] = useState("Semester 1")
   const [major, setMajor] = useState("")
+  const [university, setUniversity] = useState("")
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -72,7 +73,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!username.trim() || !password.trim() || !major.trim()) {
+    if (!username.trim() || !password.trim() || !major.trim() || !university.trim()) {
       setError("Please fill in all required fields")
       return
     }
@@ -99,6 +100,7 @@ export default function RegisterPage() {
         course: course === "Other" ? customCourse : course,
         semester,
         major,
+        university,
       })
 
       if (result.success) {
@@ -314,6 +316,22 @@ export default function RegisterPage() {
                     placeholder="Enter your major subject"
                     value={major}
                     onChange={(e) => setMajor(e.target.value)}
+                    className="h-12 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400 mb-1.5 block font-medium">
+                    <div className="flex items-center">
+                      <GraduationCap className="h-4 w-4 mr-1.5 text-gray-500" />
+                      University
+                    </div>
+                  </Label>
+                  <Input
+                    placeholder="Enter your university name"
+                    value={university}
+                    onChange={(e) => setUniversity(e.target.value)}
                     className="h-12 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     required
                   />

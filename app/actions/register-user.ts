@@ -11,6 +11,7 @@ type RegisterUserData = {
   course: string
   semester: string
   major: string
+  university: string
 }
 
 export async function registerUser(data: RegisterUserData) {
@@ -39,6 +40,7 @@ export async function registerUser(data: RegisterUserData) {
       course: data.course,
       semester: semesterNumber,
       major: data.major,
+      university: data.university,
       role: "user",
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
