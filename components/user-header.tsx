@@ -111,10 +111,6 @@ export function UserHeader() {
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/test-history")}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Test History</span>
