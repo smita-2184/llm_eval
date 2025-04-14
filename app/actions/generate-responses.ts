@@ -16,30 +16,6 @@ export type LlmResponse = {
 
 export type LlmResponses = Record<string, LlmResponse>
 
-// Add type definitions at the top of the file
-type GeminiResponse = {
-  results: Array<{
-    candidates: Array<{
-      output: string;
-    }>;
-  }>;
-};
-
-type GeminiErrorResponse = {
-  error?: {
-    message?: string;
-  };
-};
-
-type LlmResult = {
-  modelId: string;
-  response: {
-    text: string;
-    timestamp: string;
-    error?: string;
-  };
-};
-
 // Helper function to safely create OpenAI client
 async function safeCreateOpenAIClient(apiKey: string | undefined, baseURL?: string) {
   if (!apiKey || typeof apiKey !== "string" || apiKey.trim() === "") {
@@ -49,9 +25,8 @@ async function safeCreateOpenAIClient(apiKey: string | undefined, baseURL?: stri
   try {
     return await createServerOpenAIClient(apiKey.trim(), baseURL)
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error creating OpenAI client:", errorMessage);
-    throw new Error(`Failed to initialize OpenAI client: ${errorMessage}`);
+    console.error("Error creating OpenAI client:", error)
+    throw new Error(`Failed to initialize OpenAI client: ${error.message}`)
   }
 }
 
@@ -85,9 +60,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
               }
               openai = await safeCreateOpenAIClient(openaiKey)
             } catch (clientError) {
-              const errorMessage = clientError instanceof Error ? clientError.message : "Unknown error";
-              console.error("Error creating OpenAI client:", errorMessage);
-              throw new Error(`Failed to initialize OpenAI client: ${errorMessage}`);
+              throw new Error(`Failed to initialize OpenAI client: ${clientError.message}`)
             }
 
             // Validate question
@@ -161,40 +134,10 @@ export async function generateResponses(question: string): Promise<LlmResponses>
       (async () => {
         try {
           if (apiKeyStatus.validKeys.gemini && apiKeys["google-key"]) {
-            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-goog-api-key": apiKeys["google-key"],
-              },
-              body: JSON.stringify({
-                contents: [
-                  {
-                    parts: [
-                      {
-                        text: `You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations. Format your response in markdown with proper headings, bullet points, and code blocks where appropriate.
+            const geminiResponse = await callGeminiAPI(question, apiKeys["google-key"])
 
-Question: ${question}`,
-                      },
-                    ],
-                  },
-                ],
-                generationConfig: {
-                  temperature: 0.7,
-                  topK: 40,
-                  topP: 0.95,
-                  maxOutputTokens: 1024,
-                },
-              }),
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json() as GeminiErrorResponse;
-              throw new Error(errorData.error?.message || "API request failed");
-            }
-
-            const data = await response.json() as GeminiResponse;
-            const formattedResponse = `# Gemini Pro Response\n\n${data.results[0].candidates[0].output}`;
+            // Format Gemini response with markdown
+            const formattedResponse = `# Gemini Pro Response\n\n${geminiResponse}`
 
             return {
               modelId: "gemini-pro",
@@ -202,7 +145,7 @@ Question: ${question}`,
                 text: formattedResponse,
                 timestamp,
               },
-            } as LlmResult;
+            }
           } else {
             return {
               modelId: "gemini-pro",
@@ -211,7 +154,7 @@ Question: ${question}`,
                 timestamp,
                 error: "Google API key for Gemini is missing or invalid",
               },
-            } as LlmResult;
+            }
           }
         } catch (error: any) {
           console.error("Gemini API error:", error)
@@ -220,9 +163,9 @@ Question: ${question}`,
             response: {
               text: "",
               timestamp,
-              error: error instanceof Error ? error.message : "Failed to get response from Gemini",
+              error: `Failed to generate response from Gemini: ${error.message || "Unknown error"}`,
             },
-          } as LlmResult;
+          }
         }
       })(),
 

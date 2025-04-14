@@ -84,3 +84,52 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Markdown Content Styles */
+.markdown-content {
+  @apply text-foreground;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold mb-4 text-primary;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-semibold mb-3 text-primary/90;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-medium mb-2 text-primary/80;
+}
+
+.markdown-content p {
+  @apply mb-4 leading-relaxed;
+}
+
+.markdown-content ul {
+  @apply list-disc ml-6 mb-4;
+}
+
+.markdown-content li {
+  @apply mb-2;
+}
+
+.markdown-content strong {
+  @apply font-bold text-primary;
+}
+
+.markdown-content em {
+  @apply italic;
+}
+
+.markdown-content pre {
+  @apply bg-secondary/50 p-4 rounded-lg my-4 overflow-x-auto;
+}
+
+.markdown-content code {
+  @apply font-mono text-sm;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-primary/50 pl-4 my-4 italic;
+}
+
