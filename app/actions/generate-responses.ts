@@ -161,7 +161,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
       (async () => {
         try {
           if (apiKeyStatus.validKeys.gemini && apiKeys["google-key"]) {
-            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent", {
+            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
