@@ -134,21 +134,15 @@ export async function generateResponses(question: string): Promise<LlmResponses>
       (async () => {
         try {
           if (apiKeyStatus.validKeys.gemini && apiKeys["google-key"]) {
-            // Ensure the key is a string before using any string methods
-            const geminiKey = apiKeys["google-key"]
-            console.log(
-              "Using Gemini API key:",
-              geminiKey && typeof geminiKey === "string" ? `${geminiKey.substring(0, 5)}...` : "Invalid key format",
-            )
+            const geminiResponse = await callGeminiAPI(question, apiKeys["google-key"])
 
-            // Make sure to pass a valid string to callGeminiAPI
-            const geminiKeyString = typeof geminiKey === "string" ? geminiKey : ""
-            const geminiText = await callGeminiAPI(question, geminiKeyString)
+            // Format Gemini response with markdown
+            const formattedResponse = `# Gemini Pro Response\n\n${geminiResponse}`
 
             return {
               modelId: "gemini-pro",
               response: {
-                text: geminiText,
+                text: formattedResponse,
                 timestamp,
               },
             }
@@ -158,7 +152,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
               response: {
                 text: "",
                 timestamp,
-                error: "Google Gemini API key is missing or invalid",
+                error: "Google API key for Gemini is missing or invalid",
               },
             }
           }
@@ -257,7 +251,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations. Format your response in markdown with proper headings, bullet points, and code blocks where appropriate.",
                   },
                   {
                     role: "user",
@@ -277,10 +271,13 @@ export async function generateResponses(question: string): Promise<LlmResponses>
 
             const mixtralData = await mixtralResponse.json()
 
+            // Format Mixtral response with markdown
+            const formattedResponse = `# Mixtral Response\n\n${mixtralData.choices[0].message.content}`
+
             return {
               modelId: "mixtral",
               response: {
-                text: mixtralData.choices[0].message.content,
+                text: formattedResponse,
                 timestamp,
               },
             }
@@ -323,7 +320,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations.",
+                      "You are a chemistry expert. Provide a detailed, scientifically accurate response to the question. Include relevant chemical concepts, reactions, and explanations. Format your response with a 'Thinking Process' section followed by a 'Final Answer' section.",
                   },
                   {
                     role: "user",
@@ -343,10 +340,13 @@ export async function generateResponses(question: string): Promise<LlmResponses>
 
             const deepseekData = await deepseekResponse.json()
 
+            // Format DeepSeek response with thinking process and final answer sections
+            const formattedResponse = `# DeepSeek Response\n\n## Thinking Process\n\n${deepseekData.choices[0].message.content.split("Final Answer:")[0]}\n\n## Final Answer\n\n${deepseekData.choices[0].message.content.split("Final Answer:")[1] || deepseekData.choices[0].message.content}`
+
             return {
               modelId: "deepseek",
               response: {
-                text: deepseekData.choices[0].message.content,
+                text: formattedResponse,
                 timestamp,
               },
             }
