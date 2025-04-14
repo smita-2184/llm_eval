@@ -3,6 +3,7 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/auth-context"
+import { Footer } from "@/components/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,9 +20,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
