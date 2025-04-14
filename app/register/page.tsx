@@ -122,10 +122,17 @@ export default function RegisterPage() {
 
   const handleUniversityChange = (value: string) => {
     setUniversity(value)
-    // Show suggestions if the input contains "illinois" or "chicago"
+    // Show suggestions for partial matches
+    const searchTerm = value.toLowerCase()
     setShowUniversitySuggestions(
-      value.toLowerCase().includes("illinois") || 
-      value.toLowerCase().includes("chicago")
+      searchTerm.includes("illinois") || 
+      searchTerm.includes("chicago") ||
+      searchTerm.includes("uic") ||
+      searchTerm.includes("uni") ||
+      searchTerm.includes("unive") ||
+      searchTerm.includes("university") ||
+      searchTerm.includes("u of i") ||
+      searchTerm.includes("u of illinois")
     )
   }
 
