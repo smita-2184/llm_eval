@@ -52,7 +52,7 @@ type QuizQuestion = {
 type QuestionType = "Multiple Choice" | "True/False" | "Open Ended" | "Short Answer" | "Numerical"
 type Difficulty = "Easy" | "Medium" | "Hard"
 type Category = "Conceptual" | "Application" | "Context"
-type Model = "GPT-4" | "GPT-3.5" | "Gemini Pro" | "LLaMA 70B" | "Mixtral 8x7B" | "DeepSeek"
+type Model = "GPT-4" | "Gemini Pro" | "LLaMA 70B" | "Mixtral 8x7B" | "DeepSeek"
 
 // Model color mapping with improved contrast
 const modelColors = {
@@ -61,12 +61,6 @@ const modelColors = {
     border: "border-blue-300 dark:border-blue-700",
     text: "text-blue-700 dark:text-blue-300",
     icon: "🤖",
-  },
-  "GPT-3.5": {
-    bg: "bg-teal-100 dark:bg-teal-900/40",
-    border: "border-teal-300 dark:border-teal-700",
-    text: "text-teal-700 dark:text-teal-300",
-    icon: "🧠",
   },
   "Gemini Pro": {
     bg: "bg-purple-100 dark:bg-purple-900/40",

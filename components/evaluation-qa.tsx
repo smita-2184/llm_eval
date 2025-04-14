@@ -21,13 +21,6 @@ const models = [
     activeColor: "border-blue-500 bg-blue-100/30 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
-    id: "gpt-3.5",
-    name: "GPT-3.5",
-    icon: "🧠",
-    color: "border-teal-500 bg-teal-50/10 hover:bg-teal-100/20",
-    activeColor: "border-teal-500 bg-teal-100/30 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
-  },
-  {
     id: "gemini-pro",
     name: "Gemini Pro",
     icon: "🌀",
