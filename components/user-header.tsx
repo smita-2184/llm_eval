@@ -98,6 +98,16 @@ export function UserHeader() {
           Rating Guide
         </Button>
 
+        {/* Logout Button */}
+        <Button
+          onClick={handleSignOut}
+          variant="outline"
+          className="text-muted-foreground hover:text-foreground hover:bg-background/80 border-border/50 hover:border-border/80 transition-colors"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
