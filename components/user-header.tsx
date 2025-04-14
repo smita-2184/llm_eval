@@ -111,10 +111,6 @@ export function UserHeader() {
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/test-history")}>
-              <Calendar className="mr-2 h-4 w-4" />
-              <span>Test History</span>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
