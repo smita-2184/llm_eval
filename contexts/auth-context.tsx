@@ -17,6 +17,7 @@ export type UserData = {
   lastLogin: any
   createdAt: any
   password: string
+  hasCompletedScaleValidation?: boolean
 }
 
 type AuthContextType = {
@@ -25,6 +26,7 @@ type AuthContextType = {
   error: string | null
   signIn: (username: string, password: string) => Promise<void>
   signOut: () => Promise<void>
+  setUserData: (userData: UserData | null) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -85,6 +87,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Invalid password")
       }
 
+      // Check if user has completed scale validation
+      const validationsRef = collection(db, "scale_validations")
+      const validationsQuery = query(validationsRef, where("userId", "==", userDoc.id))
+      const validationsSnapshot = await getDocs(validationsQuery)
+      
+      userDataFromFirestore.hasCompletedScaleValidation = !validationsSnapshot.empty
+
       // Store the user ID for session management
       localStorage.setItem("userId", userDoc.id)
 
@@ -114,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  return <AuthContext.Provider value={{ userData, loading, error, signIn, signOut }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ userData, loading, error, signIn, signOut, setUserData }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

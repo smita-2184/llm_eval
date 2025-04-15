@@ -140,13 +140,19 @@ export function subscribeToUserActivities(
 
     // Function to recalculate completion metrics
     const updateCompletionMetrics = () => {
+      // Calculate unique completed activities by ensuring each model is only counted once per category
+      const uniqueCompletedModels = new Set(activity.completedModels)
+      const uniqueCompletedTestModels = new Set(activity.completedTestModels)
+      const uniqueCompletedQuizModels = new Set(activity.completedQuizModels)
+
       activity.completedActivities =
-        activity.completedModels.length +
-        activity.completedTestModels.length +
-        activity.completedQuizModels.length +
+        uniqueCompletedModels.size +
+        uniqueCompletedTestModels.size +
+        uniqueCompletedQuizModels.size +
         (activity.completedScaleValidation ? 1 : 0)
 
-      activity.completionPercentage = Math.round((activity.completedActivities / activity.totalActivities) * 100)
+      // Ensure completion percentage never exceeds 100%
+      activity.completionPercentage = Math.min(100, Math.round((activity.completedActivities / activity.totalActivities) * 100))
 
       // Notify caller with updated activity
       onUpdate({ ...activity })

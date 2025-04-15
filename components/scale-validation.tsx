@@ -37,11 +37,9 @@ export function ScaleValidation({ open, onOpenChange }: ScaleValidationProps) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const { userData } = useAuth()
+  const { userData, setUserData } = useAuth()
   const router = useRouter()
 
-  // Inside the handleSubmit function, remove the router.refresh() call
-  // since we're now using real-time updates
   const handleSubmit = async () => {
     if (!userData) {
       setError("You must be logged in to submit scale validations")
@@ -95,13 +93,19 @@ export function ScaleValidation({ open, onOpenChange }: ScaleValidationProps) {
 
       if (result.success) {
         setSuccess(true)
+        
+        // Update the user's hasCompletedScaleValidation status
+        if (setUserData) {
+          setUserData({
+            ...userData,
+            hasCompletedScaleValidation: true
+          })
+        }
 
         // Reset form after 3 seconds and close the modal
         setTimeout(() => {
           resetForm()
           onOpenChange(false)
-
-          // No need to refresh the page since we're using real-time updates now
         }, 3000)
       }
     } catch (err) {

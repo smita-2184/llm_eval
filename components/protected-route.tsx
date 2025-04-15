@@ -2,18 +2,22 @@
 
 import type React from "react"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2 } from "lucide-react"
+import { ScaleValidation } from "@/components/scale-validation"
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { userData, loading } = useAuth()
   const router = useRouter()
+  const [showScaleValidation, setShowScaleValidation] = useState(false)
 
   useEffect(() => {
     if (!loading && !userData) {
       router.push("/login")
+    } else if (userData && !userData.hasCompletedScaleValidation) {
+      setShowScaleValidation(true)
     }
   }, [userData, loading, router])
 
@@ -32,6 +36,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return null
   }
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <ScaleValidation open={showScaleValidation} onOpenChange={setShowScaleValidation} />
+    </>
+  )
 }
 
