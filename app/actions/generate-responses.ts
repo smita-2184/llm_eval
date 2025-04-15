@@ -206,7 +206,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
             const llamaData = await llamaResponse.json()
 
             return {
-              modelId: "llama",
+              modelId: "llama-70b",
               response: {
                 text: llamaData.choices[0].message.content,
                 timestamp,
@@ -214,7 +214,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
             }
           } else {
             return {
-              modelId: "llama",
+              modelId: "llama-70b",
               response: {
                 text: "",
                 timestamp,
@@ -225,7 +225,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
         } catch (error: any) {
           console.error("LLaMA API error:", error)
           return {
-            modelId: "llama",
+            modelId: "llama-70b",
             response: {
               text: "",
               timestamp,
@@ -251,7 +251,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
                   {
                     role: "system",
                     content:
-                      "You are an expert assistant. Provide a detailed and accurate response to the question. Format your response in markdown with proper headings, bullet points, and code blocks where appropriate.",
+                      "You are an expert assistant. Provide a detailed and accurate response to the question.",
                   },
                   {
                     role: "user",
@@ -271,19 +271,16 @@ export async function generateResponses(question: string): Promise<LlmResponses>
 
             const mixtralData = await mixtralResponse.json()
 
-            // Format Mixtral response with markdown
-            const formattedResponse = `# Mixtral Response\n\n${mixtralData.choices[0].message.content}`
-
             return {
-              modelId: "mixtral",
+              modelId: "mixtral-8x7b",
               response: {
-                text: formattedResponse,
+                text: mixtralData.choices[0].message.content,
                 timestamp,
               },
             }
           } else {
             return {
-              modelId: "mixtral",
+              modelId: "mixtral-8x7b",
               response: {
                 text: "",
                 timestamp,
@@ -294,7 +291,7 @@ export async function generateResponses(question: string): Promise<LlmResponses>
         } catch (error: any) {
           console.error("Mixtral API error:", error)
           return {
-            modelId: "mixtral",
+            modelId: "mixtral-8x7b",
             response: {
               text: "",
               timestamp,
