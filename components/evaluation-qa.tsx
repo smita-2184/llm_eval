@@ -28,14 +28,14 @@ const models = [
     activeColor: "border-purple-500 bg-purple-100/30 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   },
   {
-    id: "llama",
+    id: "llama-70b",
     name: "LLaMA 70B",
     icon: "🦙",
     color: "border-amber-500 bg-amber-50/10 hover:bg-amber-100/20",
     activeColor: "border-amber-500 bg-amber-100/30 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
   },
   {
-    id: "mixtral",
+    id: "mixtral-8x7b",
     name: "Mixtral 8x7B",
     icon: "🔄",
     color: "border-pink-500 bg-pink-50/10 hover:bg-pink-100/20",

@@ -15,8 +15,8 @@ export interface UserActivity {
 export const llmModels = [
   { id: "gpt-4", name: "GPT-4" },
   { id: "gemini-pro", name: "Gemini Pro" },
-  { id: "llama", name: "LLaMA" },
-  { id: "mixtral", name: "Mixtral" },
+  { id: "llama-70b", name: "LLaMA 70B" },
+  { id: "mixtral-8x7b", name: "Mixtral 8x7B" },
   { id: "deepseek", name: "DeepSeek" },
 ]
 

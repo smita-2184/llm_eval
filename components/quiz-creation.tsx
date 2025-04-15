@@ -217,10 +217,6 @@ export function QuizCreation() {
     document.getElementById("topic-input")?.focus()
   }
 
-  const handleSaveAll = () => {
-    console.log("Saving quiz:", { title: quizTitle, questions })
-  }
-
   const handleRateQuestion = (id: string, category: "scientific" | "clarity" | "helpfulness", rating: number) => {
     setQuestions(
       questions.map((q) => {
@@ -273,7 +269,7 @@ export function QuizCreation() {
       const quizData = {
         category: question.category.toLowerCase(),
         difficulty: question.difficulty.toLowerCase(),
-        model: question.model.toLowerCase().replace(/\s+/g, "-"),
+        model: question.model.toLowerCase().replace(/\s+/g, "-").replace("70b", "70b").replace("8x7b", "8x7b"),
         questionType: question.type.toLowerCase().replace(/\s+/g, "-"),
         topic: topic.toLowerCase(),
         userId: userData.id,
@@ -298,19 +294,28 @@ export function QuizCreation() {
           [id]: true,
         }))
 
-        // Clear success state after 3 seconds
+        // Wait for the success animation to complete (1.5 seconds)
         setTimeout(() => {
+          // Remove the question from the UI
+          setQuestions(questions.filter((q) => q.id !== id))
+          
+          // If the removed question was expanded, collapse it
+          if (expandedQuestion === id) {
+            setExpandedQuestion(null)
+          }
+
+          // Clear success state
           setSubmissionSuccess((prev) => ({
             ...prev,
             [id]: false,
           }))
-        }, 3000)
 
-        toast({
-          title: "Quiz saved",
-          description: "Your quiz question and ratings have been saved successfully",
-          variant: "default",
-        })
+          toast({
+            title: "Quiz saved",
+            description: "Your quiz question and ratings have been saved successfully",
+            variant: "default",
+          })
+        }, 1500)
       }
     } catch (error) {
       console.error("Error saving quiz:", error)
@@ -363,15 +368,6 @@ export function QuizCreation() {
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Question
-            </Button>
-
-            <Button
-              onClick={handleSaveAll}
-              className="w-full justify-start bg-green-600 hover:bg-green-700 text-white"
-              disabled={questions.length === 0}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save All
             </Button>
           </div>
         </div>
