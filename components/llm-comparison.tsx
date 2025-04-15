@@ -214,6 +214,7 @@ export function LlmComparison() {
 
     setIsSubmitting(true)
     setSubmissionSuccess(false)
+    setError("")
 
     try {
       // Create an array of promises for each model's evaluation
@@ -247,14 +248,22 @@ export function LlmComparison() {
           userId: userData.id,
           username: userData.username,
           willingness: willingness,
-          feedback: helpfulRatings[modelId] !== undefined ? {
-            isHelpful: helpfulRatings[modelId],
-            comment: comments[modelId] || undefined,
-          } : undefined,
+          ...(helpfulRatings[modelId] !== undefined && {
+            feedback: {
+              isHelpful: helpfulRatings[modelId],
+              ...(comments[modelId] && { comment: comments[modelId] }),
+            },
+          }),
         }
 
         // Save the evaluation to Firebase
-        return saveEvaluation(evaluationData)
+        const result = await saveEvaluation(evaluationData)
+        
+        if (!result.success) {
+          throw new Error(result.error || "Failed to save evaluation")
+        }
+        
+        return result
       })
 
       // Wait for all save operations to complete
@@ -271,14 +280,12 @@ export function LlmComparison() {
         setHelpfulRatings({})
         setComments({})
         setShowCommentInput({})
-
-        // No need to refresh the page since we're using real-time updates now
       } else {
         setError("No evaluations were submitted. Please rate at least one model.")
       }
     } catch (error) {
       console.error("Error submitting evaluations:", error)
-      setError("Failed to submit evaluations. Please try again.")
+      setError(error instanceof Error ? error.message : "Failed to submit evaluations. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

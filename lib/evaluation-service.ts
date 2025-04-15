@@ -23,6 +23,21 @@ export interface EvaluationData {
 
 export async function saveEvaluation(data: EvaluationData) {
   try {
+    // Validate required fields
+    if (!data.userId || !data.username || !data.modelId || !data.question || !data.response) {
+      throw new Error("Missing required fields")
+    }
+
+    // Ensure metrics are valid numbers
+    if (
+      !data.metrics ||
+      typeof data.metrics.clarity !== "number" ||
+      typeof data.metrics.helpfulness !== "number" ||
+      typeof data.metrics.scientific !== "number"
+    ) {
+      throw new Error("Invalid metrics data")
+    }
+
     // Add a new document to the llm_evaluation_ratings collection
     const docRef = await addDoc(collection(db, "llm_evaluation_ratings"), {
       ...data,
@@ -33,7 +48,11 @@ export async function saveEvaluation(data: EvaluationData) {
     return { success: true, id: docRef.id }
   } catch (error) {
     console.error("Error saving evaluation:", error)
-    throw error
+    // Return a more detailed error message
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Failed to save evaluation" 
+    }
   }
 }
 
