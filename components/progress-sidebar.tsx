@@ -166,7 +166,7 @@ export function ProgressSidebar() {
             <AccordionTrigger className="py-2 hover:no-underline text-primary">
               <div className="flex items-center">
                 <ChevronRight className="h-4 w-4 mr-2 transition-transform duration-200" />
-                <span>LLM Evaluation</span>
+                <span>LLM Comparison</span>
               </div>
             </AccordionTrigger>
             <AccordionContent>
