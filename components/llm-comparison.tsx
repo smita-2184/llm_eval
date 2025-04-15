@@ -27,6 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import { ReactElement } from "react"
+import { toast } from "@/components/ui/use-toast"
 
 const llmModels = [
   {
@@ -75,7 +76,7 @@ export function LlmComparison() {
   const [question, setQuestion] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [responses, setResponses] = useState<LlmResponses>({})
-  const [ratings, setRatings] = useState<Record<string, Record<string, number>>>({})
+  const [ratings, setRatings] = useState<Record<string, { scientific: number; clarity: number; helpfulness: number }>>({})
   const [activeTab, setActiveTab] = useState("input")
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -248,12 +249,6 @@ export function LlmComparison() {
           userId: userData.id,
           username: userData.username,
           willingness: willingness,
-          ...(helpfulRatings[modelId] !== undefined && {
-            feedback: {
-              isHelpful: helpfulRatings[modelId],
-              ...(comments[modelId] && { comment: comments[modelId] }),
-            },
-          }),
         }
 
         // Save the evaluation to Firebase
@@ -277,9 +272,16 @@ export function LlmComparison() {
         // Reset ratings after successful submission
         setRatings({})
         setWouldUseAgain({})
-        setHelpfulRatings({})
-        setComments({})
-        setShowCommentInput({})
+
+        // Show success message and switch to Take Test tab after a short delay
+        toast({
+          title: "Success",
+          description: "Your evaluations have been submitted successfully. Switching to Take Test...",
+          variant: "default",
+        })
+
+        // Switch to Take Test tab immediately
+        setActiveTab("take-test")
       } else {
         setError("No evaluations were submitted. Please rate at least one model.")
       }
@@ -620,18 +622,18 @@ export function LlmComparison() {
                               <TooltipProvider key={rating}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                                    <motion.button
+                                      whileTap={{ scale: 0.95 }}
+                                      whileHover={{ scale: 1.05 }}
+                                      className={`h-9 w-9 rounded-md flex items-center justify-center transition-all duration-200 ${
                                         ratings[modelId]?.scientific === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
-                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
+                                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                                          : "bg-secondary/50 border border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "scientific", rating)}
                                     >
                                       {rating}
-                                    </Button>
+                                    </motion.button>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>
@@ -659,18 +661,18 @@ export function LlmComparison() {
                               <TooltipProvider key={rating}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                                    <motion.button
+                                      whileTap={{ scale: 0.95 }}
+                                      whileHover={{ scale: 1.05 }}
+                                      className={`h-9 w-9 rounded-md flex items-center justify-center transition-all duration-200 ${
                                         ratings[modelId]?.clarity === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
-                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
+                                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                                          : "bg-secondary/50 border border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "clarity", rating)}
                                     >
                                       {rating}
-                                    </Button>
+                                    </motion.button>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>
@@ -698,18 +700,18 @@ export function LlmComparison() {
                               <TooltipProvider key={rating}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className={`h-9 w-9 transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                                    <motion.button
+                                      whileTap={{ scale: 0.95 }}
+                                      whileHover={{ scale: 1.05 }}
+                                      className={`h-9 w-9 rounded-md flex items-center justify-center transition-all duration-200 ${
                                         ratings[modelId]?.helpfulness === rating
-                                          ? "bg-primary/20 border-primary/50 text-primary shadow-sm"
-                                          : "bg-secondary/50 border-border/40 hover:bg-secondary/70"
+                                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                                          : "bg-secondary/50 border border-border/40 hover:bg-secondary/70"
                                       }`}
                                       onClick={() => handleRating(modelId, "helpfulness", rating)}
                                     >
                                       {rating}
-                                    </Button>
+                                    </motion.button>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>
@@ -731,74 +733,38 @@ export function LlmComparison() {
                         </div>
 
                         <div>
-                          <h4 className="font-medium mb-2 text-sm text-muted-foreground">
-                            Would you use this model again?
-                          </h4>
+                          <h4 className="font-medium mb-2 text-sm text-muted-foreground">Would you use this model again?</h4>
                           <div className="flex space-x-3">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`flex items-center ${
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              whileHover={{ scale: 1.05 }}
+                              className={`px-4 py-2 rounded-md flex items-center transition-all duration-200 ${
                                 wouldUseAgain[modelId] === true
-                                  ? "bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
-                                  : "bg-secondary/50 border-border/40"
+                                  ? "bg-green-500 text-white shadow-md shadow-green-500/20"
+                                  : "bg-secondary/50 border border-border/40 hover:bg-secondary/70"
                               }`}
                               onClick={() => handleWouldUseAgain(modelId, true)}
                             >
                               <ThumbsUp className="h-4 w-4 mr-2" />
                               Yes
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`flex items-center ${
+                            </motion.button>
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              whileHover={{ scale: 1.05 }}
+                              className={`px-4 py-2 rounded-md flex items-center transition-all duration-200 ${
                                 wouldUseAgain[modelId] === false
-                                  ? "bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300"
-                                  : "bg-secondary/50 border-border/40"
+                                  ? "bg-red-500 text-white shadow-md shadow-red-500/20"
+                                  : "bg-secondary/50 border border-border/40 hover:bg-secondary/70"
                               }`}
                               onClick={() => handleWouldUseAgain(modelId, false)}
                             >
                               <ThumbsDown className="h-4 w-4 mr-2" />
                               No
-                            </Button>
+                            </motion.button>
                           </div>
                         </div>
                       </div>
                     </CardContent>
-
-                    <CardFooter className="border-t border-border/40 pt-4 flex flex-col gap-4">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant={helpfulRatings[modelId] === true ? "default" : "outline"}
-                          size="sm"
-                          className="flex items-center"
-                          onClick={() => handleHelpfulRating(modelId, true)}
-                        >
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          Helpful
-                        </Button>
-                        <Button
-                          variant={helpfulRatings[modelId] === false ? "default" : "outline"}
-                          size="sm"
-                          className="flex items-center"
-                          onClick={() => handleHelpfulRating(modelId, false)}
-                        >
-                          <ThumbsDown className="h-4 w-4 mr-1" />
-                          Not Helpful
-                        </Button>
-                      </div>
-
-                      {showCommentInput[modelId] && (
-                        <div className="w-full">
-                          <Textarea
-                            placeholder="Add a comment (optional)"
-                            value={comments[modelId] || ""}
-                            onChange={(e) => handleCommentChange(modelId, e.target.value)}
-                            className="min-h-[100px]"
-                          />
-                        </div>
-                      )}
-                    </CardFooter>
                   </Card>
                 </motion.div>
               )
