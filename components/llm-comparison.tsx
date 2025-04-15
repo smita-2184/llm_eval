@@ -273,14 +273,14 @@ export function LlmComparison() {
         setRatings({})
         setWouldUseAgain({})
 
-        // Show success message and switch to Take Test tab after a short delay
+        // Show success message
         toast({
           title: "Success",
-          description: "Your evaluations have been submitted successfully. Switching to Take Test...",
+          description: "Your evaluations have been submitted successfully.",
           variant: "default",
         })
 
-        // Switch to Take Test tab immediately
+        // Immediately switch to Take Test tab
         setActiveTab("take-test")
       } else {
         setError("No evaluations were submitted. Please rate at least one model.")
