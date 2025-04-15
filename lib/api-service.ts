@@ -139,27 +139,3 @@ export async function saveEvaluation(data: EvaluationData) {
   }
 }
 
-export async function saveQuizFeedback(feedback: {
-  userId: string
-  username: string
-  quizId: string
-  questionId: string
-  feedback: string
-  rating: number
-}): Promise<{ success: boolean; error?: string }> {
-  try {
-    const feedbackRef = doc(collection(db, "quiz_feedback"))
-    await setDoc(feedbackRef, {
-      ...feedback,
-      timestamp: serverTimestamp(),
-    })
-    return { success: true }
-  } catch (error) {
-    console.error("Error saving quiz feedback:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to save quiz feedback",
-    }
-  }
-}
-

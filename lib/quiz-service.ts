@@ -1,5 +1,5 @@
 import { db } from "./firebase"
-import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export interface QuizQuestion {
   category: string
@@ -15,6 +15,12 @@ export interface QuizQuestion {
     question: string
     type: string
     incorrectOptions: string[]
+  }
+  ratings?: {
+    scientific?: number
+    clarity?: number
+    helpfulness?: number
+    wouldUse?: boolean
   }
 }
 
@@ -38,29 +44,5 @@ export async function fetchQuizzes() {
   // This would be implemented to fetch quizzes from Firestore
   // For now, we'll just return a placeholder
   return []
-}
-
-export async function saveQuizFeedback(feedback: {
-  userId: string
-  username: string
-  quizId: string
-  questionId: string
-  feedback: string
-  rating: number
-}): Promise<{ success: boolean; error?: string }> {
-  try {
-    const feedbackRef = doc(collection(db, "quiz_feedback"))
-    await setDoc(feedbackRef, {
-      ...feedback,
-      timestamp: serverTimestamp(),
-    })
-    return { success: true }
-  } catch (error) {
-    console.error("Error saving quiz feedback:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to save quiz feedback",
-    }
-  }
 }
 

@@ -26,27 +26,21 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { motion, AnimatePresence } from "framer-motion"
-import { saveQuizQuestion, saveQuizFeedback } from "@/lib/quiz-service"
+import { saveQuizQuestion } from "@/lib/quiz-service"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-
-type Model = "GPT-4" | "Gemini Pro" | "LLaMA 70B" | "Mixtral 8x7B" | "DeepSeek"
 
 type QuizQuestion = {
   id: string
-  quizId: string
   question: string
-  type: string
-  options?: string[]
   correctAnswer: string
-  explanation: string
-  category?: string
-  difficulty?: string
-  model: Model
   incorrectOptions: string[]
+  explanation: string
+  type: QuestionType
+  difficulty: Difficulty
+  category: Category
+  model: Model
   ratings?: {
     scientific?: number
     clarity?: number
@@ -58,37 +52,38 @@ type QuizQuestion = {
 type QuestionType = "Multiple Choice" | "True/False" | "Open Ended" | "Short Answer" | "Numerical"
 type Difficulty = "Easy" | "Medium" | "Hard"
 type Category = "Conceptual" | "Application" | "Context"
+type Model = "GPT-4" | "Gemini Pro" | "LLaMA 70B" | "Mixtral 8x7B" | "DeepSeek"
 
 // Model color mapping with improved contrast
-const modelStyles: Record<Model, { bg: string; border: string; text: string; icon: string }> = {
+const modelColors = {
   "GPT-4": {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-500",
+    bg: "bg-blue-100 dark:bg-blue-900/40",
+    border: "border-blue-300 dark:border-blue-700",
+    text: "text-blue-700 dark:text-blue-300",
     icon: "🤖",
   },
   "Gemini Pro": {
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/20",
-    text: "text-purple-500",
-    icon: "🌟",
+    bg: "bg-purple-100 dark:bg-purple-900/40",
+    border: "border-purple-300 dark:border-purple-700",
+    text: "text-purple-700 dark:text-purple-300",
+    icon: "🌀",
   },
   "LLaMA 70B": {
-    bg: "bg-green-500/10",
-    border: "border-green-500/20",
-    text: "text-green-500",
+    bg: "bg-amber-100 dark:bg-amber-900/40",
+    border: "border-amber-300 dark:border-amber-700",
+    text: "text-amber-700 dark:text-amber-300",
     icon: "🦙",
   },
   "Mixtral 8x7B": {
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
-    text: "text-orange-500",
-    icon: "🌀",
+    bg: "bg-pink-100 dark:bg-pink-900/40",
+    border: "border-pink-300 dark:border-pink-700",
+    text: "text-pink-700 dark:text-pink-300",
+    icon: "🔄",
   },
-  DeepSeek: {
-    bg: "bg-red-500/10",
-    border: "border-red-500/20",
-    text: "text-red-500",
+  "DeepSeek": {
+    bg: "bg-indigo-100 dark:bg-indigo-900/40",
+    border: "border-indigo-300 dark:border-indigo-700",
+    text: "text-indigo-700 dark:text-indigo-300",
     icon: "🔍",
   },
 }
@@ -115,10 +110,6 @@ const difficultyColors = {
   },
 }
 
-const isModel = (value: string): value is Model => {
-  return ["GPT-4", "Gemini Pro", "LLaMA 70B", "Mixtral 8x7B", "DeepSeek"].includes(value)
-}
-
 export function QuizCreation() {
   const [quizTitle, setQuizTitle] = useState("")
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
@@ -130,9 +121,6 @@ export function QuizCreation() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null)
   const [submissionSuccess, setSubmissionSuccess] = useState<Record<string, boolean>>({})
-  const [selectedQuestion, setSelectedQuestion] = useState<QuizQuestion | null>(null)
-  const [feedback, setFeedback] = useState("")
-  const [rating, setRating] = useState(0)
 
   const { userData } = useAuth()
   const { toast } = useToast()
@@ -201,21 +189,15 @@ export function QuizCreation() {
 
       const newQuestion: QuizQuestion = {
         id: Date.now().toString(),
-        quizId: "default",
         question: questionText,
-        type: selectedType,
-        options: selectedType === "Multiple Choice" ? [correctAnswer, ...incorrectOptions] : undefined,
-        correctAnswer,
+        correctAnswer: correctAnswer,
+        incorrectOptions: incorrectOptions,
         explanation: `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a topic that can be explored from various perspectives. Understanding ${topic} is essential for gaining a comprehensive knowledge of the subject matter. The field encompasses both theoretical and practical aspects, including key concepts and real-world applications.`,
-        category: selectedCategory,
+        type: selectedType,
         difficulty: selectedDifficulty,
-        model: selectedModel as Model,
-        incorrectOptions,
-        ratings: {
-          scientific: 0,
-          clarity: 0,
-          helpfulness: 0,
-        },
+        category: selectedCategory,
+        model: selectedModel,
+        ratings: {},
       }
 
       setQuestions([...questions, newQuestion])
@@ -289,9 +271,9 @@ export function QuizCreation() {
     try {
       // Format the data according to the required structure
       const quizData = {
-        category: question.category?.toLowerCase() || "conceptual",
-        difficulty: question.difficulty?.toLowerCase() || "medium",
-        model: question.model?.toLowerCase().replace(/\s+/g, "-") || "gpt-4",
+        category: question.category.toLowerCase(),
+        difficulty: question.difficulty.toLowerCase(),
+        model: question.model.toLowerCase().replace(/\s+/g, "-"),
         questionType: question.type.toLowerCase().replace(/\s+/g, "-"),
         topic: topic.toLowerCase(),
         userId: userData.id,
@@ -303,6 +285,7 @@ export function QuizCreation() {
           type: question.type.toLowerCase().replace(/\s+/g, "-"),
           incorrectOptions: question.incorrectOptions,
         },
+        ratings: question.ratings || {}
       }
 
       // Save the quiz data to Firebase
@@ -325,7 +308,7 @@ export function QuizCreation() {
 
         toast({
           title: "Quiz saved",
-          description: "Your quiz question has been saved successfully",
+          description: "Your quiz question and ratings have been saved successfully",
           variant: "default",
         })
       }
@@ -339,59 +322,8 @@ export function QuizCreation() {
     }
   }
 
-  const handleSubmitFeedback = async () => {
-    if (!userData) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to submit feedback",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!selectedQuestion || !feedback || rating === 0) {
-      toast({
-        title: "Error",
-        description: "Please provide both feedback and a rating",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      const result = await saveQuizFeedback({
-        userId: userData.id,
-        username: userData.username,
-        quizId: selectedQuestion.quizId,
-        questionId: selectedQuestion.id,
-        feedback: feedback,
-        rating: rating,
-      })
-
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: "Your feedback has been submitted successfully",
-          variant: "default",
-        })
-        setFeedback("")
-        setRating(0)
-        setSelectedQuestion(null)
-      } else {
-        throw new Error(result.error || "Failed to save feedback")
-      }
-    } catch (error) {
-      console.error("Error submitting feedback:", error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit feedback",
-        variant: "destructive",
-      })
-    }
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col md:flex-row gap-6">
       {/* Left sidebar */}
       <div className="w-full md:w-64 flex-shrink-0">
         <div className="sticky top-4">
@@ -464,7 +396,7 @@ export function QuizCreation() {
               <div>
                 <p className="text-sm font-medium mb-3 text-foreground">Select Model</p>
                 <div className="flex flex-wrap gap-2">
-                  {Object.entries(modelStyles).map(([model, colors]) => (
+                  {Object.entries(modelColors).map(([model, colors]) => (
                     <Badge
                       key={model}
                       variant="outline"
@@ -586,22 +518,13 @@ export function QuizCreation() {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2 mb-4">
-                            {(() => {
-                              const model = question.model
-                              if (model && isModel(model)) {
-                                const style = modelStyles[model]
-                                return (
-                                  <Badge
-                                    variant="outline"
-                                    className={`px-2.5 py-1 rounded-md ${style.bg} ${style.border} ${style.text}`}
-                                  >
-                                    <span className="mr-1">{style.icon}</span>
-                                    {model}
-                                  </Badge>
-                                )
-                              }
-                              return null
-                            })()}
+                            <Badge
+                              variant="outline"
+                              className={`px-2.5 py-1 rounded-md ${modelColors[question.model].bg} ${modelColors[question.model].border} ${modelColors[question.model].text}`}
+                            >
+                              <span className="mr-1">{modelColors[question.model].icon}</span>
+                              {question.model}
+                            </Badge>
                             <Badge
                               variant="outline"
                               className={`px-2.5 py-1 rounded-md ${difficultyColors[question.difficulty].bg} ${difficultyColors[question.difficulty].border} ${difficultyColors[question.difficulty].text}`}
@@ -611,13 +534,7 @@ export function QuizCreation() {
                             </Badge>
                             <Badge
                               variant="outline"
-                              className={`px-2.5 py-1 rounded-md ${
-                                question.type === "Multiple Choice"
-                                  ? "bg-blue-500/10 border-blue-500/20 text-blue-500"
-                                  : question.type === "True/False"
-                                    ? "bg-green-500/10 border-green-500/20 text-green-500"
-                                    : "bg-purple-500/10 border-purple-500/20 text-purple-500"
-                              }`}
+                              className="px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-900/40 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
                             >
                               {question.type}
                             </Badge>
@@ -816,11 +733,7 @@ export function QuizCreation() {
 
                                 <Button
                                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-4 relative overflow-hidden"
-                                  onClick={() => {
-                                    setSelectedQuestion(question)
-                                    setFeedback("")
-                                    setRating(0)
-                                  }}
+                                  onClick={() => handleSubmitRating(question.id)}
                                   disabled={
                                     !question.ratings?.scientific ||
                                     !question.ratings?.clarity ||
@@ -896,74 +809,6 @@ export function QuizCreation() {
           </div>
         )}
       </div>
-
-      {/* Feedback Form */}
-      <AnimatePresence>
-        {selectedQuestion && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-card text-card-foreground rounded-lg shadow-lg p-6 max-w-md w-full space-y-4"
-            >
-              <h3 className="text-lg font-semibold">Submit Feedback</h3>
-              <p className="text-sm text-muted-foreground">
-                Please provide your feedback for this question
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="feedback">Feedback</Label>
-                  <Textarea
-                    id="feedback"
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="Enter your feedback here..."
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label>Rating</Label>
-                  <div className="flex space-x-2 mt-1">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <Button
-                        key={value}
-                        variant={rating === value ? "default" : "outline"}
-                        size="sm"
-                        className="w-10 h-10 p-0"
-                        onClick={() => setRating(value)}
-                      >
-                        {value}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedQuestion(null)
-                    setFeedback("")
-                    setRating(0)
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmitFeedback}>Submit</Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
